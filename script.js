@@ -1,21 +1,41 @@
 // Function to show error message/icon
 function showError(inputId, errorMessage, errorIconId) {
-    document.getElementById(inputId + '-error').textContent = errorMessage;
-    document.getElementById(inputId + '-error').style.display = "block";
-    document.getElementById(errorIconId).style.display = "block";
-    document.getElementById(inputId).classList.add('input-error');
+    const errorElement = document.getElementById(inputId + '-error');
+    const errorIconElement = document.getElementById(errorIconId);
+    const inputElement = document.getElementById(inputId);
+
+    if (errorElement) {
+        errorElement.textContent = errorMessage;
+        errorElement.style.display = 'block';
+    }
+    if (errorIconElement) {
+        errorIconElement.style.display = 'block';
+    }
+    if (inputElement) {
+        inputElement.classList.add('input-error');
+    }
 }
 
 // Function to hide error message/icon
 function hideError(inputId, errorIconId) {
-    document.getElementById(inputId + '-error').style.display = "none";
-    document.getElementById(errorIconId).style.display = "none";
-    document.getElementById(inputId).classList.remove('input-error');
+    const errorElement = document.getElementById(inputId + '-error');
+    const errorIconElement = document.getElementById(errorIconId);
+    const inputElement = document.getElementById(inputId);
+
+    if (errorElement) {
+        errorElement.style.display = 'none';
+    }
+    if (errorIconElement) {
+        errorIconElement.style.display = 'none';
+    }
+    if (inputElement) {
+        inputElement.classList.remove('input-error');
+    }
 }
 
-// Function to check field
-function validateField(value, inputId, errorIconId, errorMessage, additionalCheck = () => true) {
-    if (value === "") {
+// Function to validate a field
+function validateField(value, inputId, errorIconId, errorMessage) {
+    if (value.trim() === '') {
         showError(inputId, errorMessage, errorIconId);
         return false;
     } else {
@@ -24,25 +44,45 @@ function validateField(value, inputId, errorIconId, errorMessage, additionalChec
     }
 }
 
-document.getElementById("claim-button").addEventListener("click", function(event) {
+// Function to check email format
+function validateEmail(email) {
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Basic email validation pattern
+    return emailPattern.test(email);
+}
+
+// Event listener for form submission
+document.getElementById('claim-button').addEventListener('click', function(event) {
     event.preventDefault(); // Prevent form submission
 
-    const firstName = document.getElementById("first-name").value.trim();
-    const lastName = document.getElementById("last-name").value.trim();
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value.trim();
+    const fields = [
+        { id: 'first-name', errorIcon: 'first-name-error-icon', errorMessage: 'First Name cannot be empty' },
+        { id: 'last-name', errorIcon: 'last-name-error-icon', errorMessage: 'Last Name cannot be empty' },
+        { id: 'email', errorIcon: 'email-error-icon', errorMessage: 'Email cannot be empty' },
+        { id: 'password', errorIcon: 'password-error-icon', errorMessage: 'Password cannot be empty' },
+    ];
 
-    let formIsValid = true;
+    let isValid = true; // To track overall validity
+    const email = document.getElementById('email').value.trim();
 
-    // Check every field
-    formIsValid &= validateField(firstName, "first-name", "first-name-error-icon", "First name cannot be empty.");
-    formIsValid &= validateField(lastName, "last-name", "last-name-error-icon", "Last name cannot be empty.");
-    formIsValid &= validateField(email, "email", "email-error-icon", "Email cannot be empty.");
-    formIsValid &= validateField(password, "password", "password-error-icon", "Password cannot be empty.");
+    // Validate each field
+    fields.forEach(field => {
+        const value = document.getElementById(field.id).value.trim();
+        if (field.id === 'email') {
+            if (!validateField(value, field.id, field.errorIcon, field.errorMessage) || !validateEmail(value)) {
+                showError(field.id, 'Looks like this is not an email', field.errorIcon);
+                isValid = false;
+            }
+        } else {
+            if (!validateField(value, field.id, field.errorIcon, field.errorMessage)) {
+                isValid = false;
+            }
+        }
+    });
 
-    // If form is valid, submit the form
-    if (formIsValid) {
-        document.getElementById("claim-form").submit();
+    // If all fields are valid, you can submit the form or perform any action you need
+    if (isValid) {
+        console.log('Form submitted successfully!'); // Placeholder for actual form submission
+        // Uncomment the following line to actually submit the form
+        // document.getElementById('your-form-id').submit();
     }
-})
-
+});
